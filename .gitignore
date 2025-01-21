@@ -2,12 +2,12 @@
 
 # dependencies
 node_modules/
+server/.env
 
 # Expo
 .expo/
 dist/
 web-build/
-expo-env.d.ts
 
 # Native
 *.orig.*
