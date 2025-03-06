@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const mongoURI = process.env.MONGO_URI
+const mongoURI = process.env.MONGO_URI || 'mongodb+srv://chandrasaiteja0804:Saiteja2004@cluster0.y9pqj.mongodb.net/test'
 
 mongoose
   .connect(mongoURI, {
@@ -73,27 +73,27 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-// const PORT = process.env.PORT || 3000;
-// function getNetworkIp() {
-//     const interfaces = os.networkInterfaces();
-//     for (const iface of Object.values(interfaces)) {
-//       for (const details of iface) {
-//         if (details.family === "IPv4" && !details.internal) {
-//           return details.address;
-//         }
-//       }
-//     }
-//     return "localhost";
-//   }
-  
-//   app.listen(PORT, "0.0.0.0", () => {
-//     const networkIp = getNetworkIp();
-//     console.log(`Server running at:`);
-//     console.log(`- Local:   http://localhost:${PORT}`);
-//     console.log(`- Network: http://${networkIp}:${PORT}`);
-//   });
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+function getNetworkIp() {
+    const interfaces = os.networkInterfaces();
+    for (const iface of Object.values(interfaces)) {
+      for (const details of iface) {
+        if (details.family === "IPv4" && !details.internal) {
+          return details.address;
+        }
+      }
+    }
+    return "localhost";
+  }
+  
+  app.listen(PORT, "0.0.0.0", () => {
+    const networkIp = getNetworkIp();
+    console.log(`Server running at:`);
+    console.log(`- Local:   http://localhost:${PORT}`);
+    console.log(`- Network: http://${networkIp}:${PORT}`);
+  });
+
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
