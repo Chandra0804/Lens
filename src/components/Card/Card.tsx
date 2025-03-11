@@ -1,3 +1,4 @@
+import React from "react";
 import { View, StyleSheet } from "react-native";
 
 export function Card({ children }: { children: React.ReactNode }) {

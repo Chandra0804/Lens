@@ -1,3 +1,4 @@
+import React from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Heading } from "../../../../components";
 import { Image as ImageType } from "../../../../data/types";

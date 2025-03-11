@@ -5,14 +5,17 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { HomeScreen, ResultScreen, TestScreen } from "./src/screens";
 import { LoginScreen } from "./src/screens/Login";
 import { RegisterScreen } from "./src/screens/Register";
+import { RootStackParamList } from "./src/types/navigation";
+import { UserType } from "./src/screens/Home/HomeScreen";
 
-
-const Stack = createNativeStackNavigator();
+// Type the Stack navigator with our RootStackParamList
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   const [isSplashVisible, setIsSplashVisible] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
+  // Use UserType from HomeScreen
+  const [user, setUser] = useState<UserType | null>(null);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -44,7 +47,14 @@ export default function App() {
             />
             )}
           </Stack.Screen>
-          <Stack.Screen name="Register" component={RegisterScreen}/>
+          <Stack.Screen 
+            name="Register" 
+            component={RegisterScreen}
+            options={{
+              headerShown: true,
+              title: "Create Account"
+            }}
+          />
           </>
           
         ) : (
@@ -60,7 +70,13 @@ export default function App() {
                 header: () => null,
               }}
             />
-            <Stack.Screen name="Result" component={ResultScreen} />
+            <Stack.Screen 
+              name="Result" 
+              component={ResultScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
           </>
         )}
       </Stack.Navigator>

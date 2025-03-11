@@ -1,3 +1,4 @@
+import React from "react";
 import { BookmarkIcon, ChartBarIcon, HomeIcon, SettingsIcon } from '../Icons';
 import { StyleSheet, Text, View } from 'react-native';
 

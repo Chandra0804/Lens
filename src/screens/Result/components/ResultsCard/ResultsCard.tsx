@@ -1,3 +1,4 @@
+import React from "react";
 import { DimensionValue, StyleSheet, Text, View } from 'react-native';
 
 interface Props {

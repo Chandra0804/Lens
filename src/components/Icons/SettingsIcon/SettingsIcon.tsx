@@ -1,3 +1,4 @@
+import React from "react";
 import { G, Path, Circle, Svg } from 'react-native-svg';
 import { IconProps } from '../types';
 import { styles } from '../styles';
