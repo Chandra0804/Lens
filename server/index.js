@@ -94,6 +94,20 @@ const noteSchema = new mongoose.Schema({
 
 const Note = mongoose.model("Note", noteSchema);
 
+// Question Schema
+const questionSchema = new mongoose.Schema({
+  text: { type: String, required: true },
+  options: [{ type: String, required: true }],
+  correctAnswer: { type: String, required: true },
+  explanation: { type: String, required: true },
+  subject: { type: String, required: true },
+  topic: { type: String, required: true },
+  difficulty: { type: String, enum: ['easy', 'medium', 'hard'], required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+
+const Question = mongoose.model("Question", questionSchema);
+
 // Authentication Routes
 app.post("/api/auth/register", async (req, res) => {
   const { username, phoneNumber, password, college, specialization, graduationYear } = req.body;
@@ -397,6 +411,109 @@ app.post("/api/subscription/:userId", async (req, res) => {
     }
     
     res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+});
+
+// Quiz Questions Routes
+app.get("/api/questions/:subject", async (req, res) => {
+  try {
+    const questions = await Question.find({ subject: req.params.subject })
+      .select('-correctAnswer -explanation')  // Don't send answers to client
+      .limit(10);  // Limit to 10 questions per quiz
+    
+    if (!questions.length) {
+      return res.status(404).json({ message: "No questions found for this subject." });
+    }
+    
+    res.status(200).json(questions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+});
+
+app.post("/api/questions/verify", async (req, res) => {
+  try {
+    const { questionId, answer } = req.body;
+    const question = await Question.findById(questionId);
+    
+    if (!question) {
+      return res.status(404).json({ message: "Question not found." });
+    }
+    
+    const isCorrect = question.correctAnswer === answer;
+    res.status(200).json({
+      isCorrect,
+      explanation: question.explanation,
+      correctAnswer: question.correctAnswer,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+});
+
+// Admin route to add questions
+app.post("/api/questions", async (req, res) => {
+  try {
+    const { text, options, correctAnswer, explanation, subject, topic, difficulty } = req.body;
+    
+    // Basic validation
+    if (!options.includes(correctAnswer)) {
+      return res.status(400).json({ message: "Correct answer must be one of the options." });
+    }
+    
+    const newQuestion = new Question({
+      text,
+      options,
+      correctAnswer,
+      explanation,
+      subject,
+      topic,
+      difficulty,
+    });
+    
+    await newQuestion.save();
+    res.status(201).json({ message: "Question added successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+});
+
+// Get user's quiz history
+app.get("/api/quiz-history/:userId", async (req, res) => {
+  try {
+    const results = await Result.find({ userId: req.params.userId })
+      .sort({ date: -1 })
+      .limit(10);
+    
+    res.status(200).json(results);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+});
+
+// Get subject-wise progress
+app.get("/api/subject-progress/:userId", async (req, res) => {
+  try {
+    const results = await Result.aggregate([
+      { $match: { userId: mongoose.Types.ObjectId(req.params.userId) } },
+      {
+        $group: {
+          _id: "$subject",
+          totalAttempts: { $sum: 1 },
+          averageScore: { $avg: { $divide: ["$score", "$totalQuestions"] } },
+          totalTimeTaken: { $sum: "$timeTaken" },
+        },
+      },
+    ]);
+    
+    res.status(200).json(results);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error. Please try again later." });

@@ -1,9 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { ResultScreenProps } from "../../types/navigation";
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Share, Alert } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Share, Alert, Dimensions } from "react-native";
 import { ResultsCard, TimeSpentCard, Button } from "./components";
 import { SafeAreaBox } from "../../components";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '../../types/navigation';
+
+type ResultScreenProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'Result'>;
+  route: RouteProp<RootStackParamList, 'Result'>;
+};
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export function ResultScreen({ navigation, route }: ResultScreenProps) {
   const { correctAnswers, totalQuestions, timeTaken, subject, moduleId, userId } = route.params;
@@ -105,6 +115,26 @@ export function ResultScreen({ navigation, route }: ResultScreenProps) {
     }
   };
   
+  const getGrade = (percentage: number) => {
+    if (percentage >= 90) return { grade: 'A+', color: '#22c55e' };
+    if (percentage >= 80) return { grade: 'A', color: '#10b981' };
+    if (percentage >= 70) return { grade: 'B', color: '#0ea5e9' };
+    if (percentage >= 60) return { grade: 'C', color: '#f59e0b' };
+    if (percentage >= 50) return { grade: 'D', color: '#f97316' };
+    return { grade: 'F', color: '#ef4444' };
+  };
+
+  const { grade, color } = getGrade(percentage);
+
+  const getFeedback = (percentage: number) => {
+    if (percentage >= 90) return 'Excellent! You have mastered this topic!';
+    if (percentage >= 80) return 'Great job! Keep up the good work!';
+    if (percentage >= 70) return 'Good performance! Room for improvement.';
+    if (percentage >= 60) return 'Fair attempt. More practice needed.';
+    if (percentage >= 50) return 'You passed, but need more study.';
+    return 'Keep practicing. You can do better!';
+  };
+
   return (
     <SafeAreaBox>
       <View style={styles.header}>
@@ -139,23 +169,40 @@ export function ResultScreen({ navigation, route }: ResultScreenProps) {
           <TimeSpentCard timeTaken={timeTaken} />
         </View>
         
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{percentage}%</Text>
-            <Text style={styles.statLabel}>Score</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{formatTime(timeTaken)}</Text>
-            <Text style={styles.statLabel}>Time</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>
-              {Math.round((timeTaken / 1000) / totalQuestions)}s
+        <View style={styles.scoreContainer}>
+          <View style={[styles.gradeCircle, { borderColor: color }]}>
+            <Text style={[styles.grade, { color }]}>{grade}</Text>
+            <Text style={[styles.percentage, { color }]}>
+              {Math.round(percentage)}%
             </Text>
-            <Text style={styles.statLabel}>Per Question</Text>
           </View>
+
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <Icon name="check-circle" size={24} color="#22c55e" />
+              <Text style={styles.statLabel}>Correct</Text>
+              <Text style={styles.statValue}>{correctAnswers}</Text>
+            </View>
+
+            <View style={styles.statItem}>
+              <Icon name="close-circle" size={24} color="#ef4444" />
+              <Text style={styles.statLabel}>Wrong</Text>
+              <Text style={styles.statValue}>{totalQuestions - correctAnswers}</Text>
+            </View>
+
+            <View style={styles.statItem}>
+              <Icon name="clock-outline" size={24} color="#0ea5e9" />
+              <Text style={styles.statLabel}>Time</Text>
+              <Text style={styles.statValue}>
+                {formatTime(timeTaken)}
+              </Text>
+            </View>
+          </View>
+        </View>
+        
+        <View style={styles.feedbackContainer}>
+          <Text style={styles.feedbackTitle}>Feedback</Text>
+          <Text style={styles.feedbackText}>{getFeedback(percentage)}</Text>
         </View>
         
         {improvementAreas.length > 0 && (
@@ -260,39 +307,61 @@ const styles = StyleSheet.create({
     gap: 16,
     marginBottom: 16,
   },
+  scoreContainer: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  gradeCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  grade: {
+    fontSize: 36,
+    fontWeight: 'bold',
+  },
+  percentage: {
+    fontSize: 18,
+  },
   statsContainer: {
-    flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 16,
-    padding: 16,
-    borderRadius: 12,
-    justifyContent: "space-between",
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginTop: 20,
   },
   statItem: {
-    alignItems: "center",
-    flex: 1,
+    alignItems: 'center',
+  },
+  statLabel: {
+    color: '#64748b',
+    fontSize: 14,
+    marginVertical: 4,
   },
   statValue: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#0E7490",
+    fontWeight: 'bold',
+    color: '#0f172a',
   },
-  statLabel: {
-    fontSize: 14,
-    color: "#64748B",
-    marginTop: 4,
+  feedbackContainer: {
+    padding: 20,
+    backgroundColor: '#f8fafc',
+    margin: 20,
+    borderRadius: 12,
   },
-  statDivider: {
-    width: 1,
-    backgroundColor: "#E5E7EB",
-    height: "80%",
-    alignSelf: "center",
+  feedbackTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#0f172a',
+    marginBottom: 8,
+  },
+  feedbackText: {
+    fontSize: 16,
+    color: '#334155',
+    lineHeight: 24,
   },
   improvementContainer: {
     backgroundColor: "#FFFFFF",

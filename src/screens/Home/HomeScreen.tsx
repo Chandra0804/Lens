@@ -172,12 +172,11 @@ export function HomeScreen({ navigation, user }: HomeScreenProps) {
     setRecentlyViewed(updatedRecent);
     AsyncStorage.setItem('recentlyViewed', JSON.stringify(updatedRecent));
     
-    // Navigate to test screen
-    navigation.navigate("Test", {
-      title: module.name,
-      testName,
+    // Navigate to quiz screen instead of test screen
+    navigation.navigate("Quiz", {
       subject: module.name.toLowerCase(),
-      userId: user?._id,
+      moduleId: testName,
+      userId: user?._id || '',
     });
   };
   

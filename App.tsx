@@ -5,8 +5,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { HomeScreen, ResultScreen, TestScreen } from "./src/screens";
 import { LoginScreen } from "./src/screens/Login";
 import { RegisterScreen } from "./src/screens/Register";
+import { QuizScreen } from "./src/screens/Quiz/QuizScreen";
 import { RootStackParamList } from "./src/types/navigation";
 import { UserType } from "./src/screens/Home/HomeScreen";
+import { QuizProvider } from "./src/context/QuizContext";
 
 // Type the Stack navigator with our RootStackParamList
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -29,58 +31,67 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          animation: "slide_from_right",
-        }}
-      >
-        {!isLoggedIn ? (
-          <>
-          <Stack.Screen name="Login">
-            {(props) => (
-              <LoginScreen
-              {...props}
-              setIsLoggedIn={setIsLoggedIn}
-              setUser={setUser} // Pass setUser to update user state
-            />
-            )}
-          </Stack.Screen>
-          <Stack.Screen 
-            name="Register" 
-            component={RegisterScreen}
-            options={{
-              headerShown: true,
-              title: "Create Account"
-            }}
-          />
-          </>
-          
-        ) : (
-          <>
-             <Stack.Screen name="Home">
-              {(props) => <HomeScreen {...props} user={user} />}
-            </Stack.Screen>
-            <Stack.Screen
-              name="Test"
-              component={TestScreen}
-              options={{
-                headerShown: true,
-                header: () => null,
-              }}
-            />
-            <Stack.Screen 
-              name="Result" 
-              component={ResultScreen}
-              options={{
-                headerShown: false,
-              }}
-            />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <QuizProvider>
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+            animation: "slide_from_right",
+          }}
+        >
+          {!isLoggedIn ? (
+            <>
+              <Stack.Screen name="Login">
+                {(props) => (
+                  <LoginScreen
+                    {...props}
+                    setIsLoggedIn={setIsLoggedIn}
+                    setUser={setUser}
+                  />
+                )}
+              </Stack.Screen>
+              <Stack.Screen
+                name="Register"
+                component={RegisterScreen}
+                options={{
+                  headerShown: true,
+                  title: "Create Account",
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="Home">
+                {(props) => <HomeScreen {...props} user={user} />}
+              </Stack.Screen>
+              <Stack.Screen
+                name="Quiz"
+                component={QuizScreen}
+                options={{
+                  headerShown: true,
+                  title: "Quiz",
+                }}
+              />
+              <Stack.Screen
+                name="Test"
+                component={TestScreen}
+                options={{
+                  headerShown: true,
+                  header: () => null,
+                }}
+              />
+              <Stack.Screen
+                name="Result"
+                component={ResultScreen}
+                options={{
+                  headerShown: false,
+                }}
+              />
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </QuizProvider>
   );
 }
 

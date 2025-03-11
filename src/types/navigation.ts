@@ -5,29 +5,24 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
  */
 export type RootStackParamList = {
   Home: undefined;
-  Login: {
-    redirectTo?: keyof RootStackParamList;
-  };
-  Register: {
-    email?: string;
-    name?: string;
-    redirectTo?: keyof RootStackParamList;
+  Login: undefined;
+  Register: undefined;
+  Quiz: {
+    subject: string;
+    moduleId: string;
+    userId: string;
   };
   Test: {
     title: string;
     testName: string;
     subject: string;
-    moduleId: string;
     userId: string;
-    difficulty: string;
   };
   Result: {
-    correctAnswers: number;
-    totalQuestions: number;
+    score: number;
+    total: number;
     timeTaken: number;
     subject: string;
-    moduleId: string;
-    userId: string;
   };
   // Add other routes as needed
 };
